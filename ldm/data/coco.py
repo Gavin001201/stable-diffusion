@@ -48,7 +48,7 @@ class CocoBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.img_id_to_filepath[self.labels["image_ids"][i]]
-        image = Image.open(image_path)(img_path)
+        image = Image.open(img_path)
 
         if not image.mode == "RGB":
             image = image.convert("RGB")
