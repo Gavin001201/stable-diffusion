@@ -150,6 +150,7 @@ class SpatialSelfAttention(nn.Module):
 
 
 class CrossAttention(nn.Module):
+    first_layer = True
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64, dropout=0.):
         super().__init__()
         inner_dim = dim_head * heads
@@ -184,6 +185,12 @@ class CrossAttention(nn.Module):
             max_neg_value = -torch.finfo(sim.dtype).max
             mask = repeat(mask, 'b j -> (b h) () j', h=h)
             sim.masked_fill_(~mask, max_neg_value)
+
+        if (CrossAttention.first_layer == True) and (context.shape != x.shape):
+            random_columns = torch.randperm(sim.shape[2])[:math.ceil(0.2 * sim.shape[2])]
+            # 使用索引操作将对应位置的元素置为0
+            sim[:, :, random_columns] = float('-inf')
+            CrossAttention.first_layer = False
 
         # attention, what we cannot get enough of
         attn = sim.softmax(dim=-1)
